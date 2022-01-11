@@ -28,7 +28,33 @@ def give_dimensions():
     
     return int(n)
 
+def player_move():
+    def place_in_col(col): # Drops disk in column
+        row = n-1
+        while positions[row][col-1] != ' ': # Starts checking if column cell is empty from bottom to top
+            row -= 1 # Goes on cell up until the first empty cell is found
+        positions[row][col-1] = 'O' # Drops disk in the empty cell
+        change_board(row, col-1)
+
+    def change_board(i, j): # Updates the state of the game board
+        board[i+2][j+1] = f'   {positions[i][j]}|'
+
+
+    col = input("Player 1: Choose a column for your disk: ").strip()
+
+    while not col.isdigit() or int(col)<1 or int(col)>n or positions[0][int(col)-1]!=' ': # Checks that input is 1-N integer and column is empty
+        col = input("Player 1: Choose a valid column for your disk: ").strip()
+    
+    place_in_col(int(col))
+
 n = give_dimensions()
-positions = [[' ']*n]*n # nXn list for player moves
+positions = [] # nXn list for player moves
+for i in range(n): # initialized as empty
+    positions.append([' ']*n)
+
 board = make_board()
+print_board()
+player_move()
+print_board()
+player_move()
 print_board()
