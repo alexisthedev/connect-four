@@ -6,6 +6,9 @@ Dimitris Fotogiannopoulos
 Dimitris Toumazatos
 """
 
+from turtle import pos
+
+
 def make_board(): # Creates an empty nXn game board
     board = [[] for x in range(n)]
 
@@ -60,6 +63,39 @@ def player_move(player):
 
     def change_board(i, j): # Updates the state of the game board
         board[i+2][j+1] = f'   {positions[i][j]}|'
+
+    def asterisks(hor, ver, diag1, diag2): # Changes winning disks to asterisks (*)
+            for i in range(n):
+                for j in range(n):
+                    if hor[i][j] == '*':
+                        positions[i][j] = '*'
+                        change_board(i, j)
+                    elif ver[i][j] == '*':
+                        positions[i][j] = '*'
+                        change_board(i, j)
+                    elif diag1[i][j] == '*':
+                        positions[i][j] = '*'
+                        change_board(i, j)
+                    elif diag2[i][j] == '*':
+                        positions[i][j] = '*'
+                        change_board(i, j)
+    
+    def remove_asterisks(): # Removes asterisks and slides down other disks
+        for j in range(n):
+            for i in range(n-1, 0, -1): # Covers for horizontal and diagonal sequences
+                if positions[i][j] == '*':
+                    positions[i][j] = positions[i-1][j]
+                    positions[i-1][j] = '*'
+                    change_board(i,j)
+            
+        for i in range(n): # Covers for vertical sequences (can't have disks on top of them)
+            for j in range(n):
+                if positions[i][j] == '*':
+                    positions[i][j] = ' '
+                    change_board(i,j)
+        
+        
+
     
     def wincond(p): # Checks if player wins after latest move (p is tuple of (i, j))
         def horizontal(player): # Checks for 4 disks in row
@@ -231,27 +267,12 @@ def player_move(player):
 
     doeswin = wincond(cords) # Tuple of Boolean and a list of temporal boards that replaced winning disks with *
     if doeswin[0]:
-        hor = doeswin[1][0]
-        ver = doeswin[1][1]
-        diag1 = doeswin[1][2]
-        diag2 = doeswin[1][3]
-        for i in range(n): # Changes main board's winning disks with asterisks (*)
-            for j in range(n):
-                if hor[i][j] == '*':
-                    positions[i][j] = '*'
-                    change_board(i, j)
-                elif ver[i][j] == '*':
-                    positions[i][j] = '*'
-                    change_board(i, j)
-                elif diag1[i][j] == '*':
-                    positions[i][j] = '*'
-                    change_board(i, j)
-                elif diag2[i][j] == '*':
-                    positions[i][j] = '*'
-                    change_board(i, j)
-        
+        asterisks(doeswin[1][0], doeswin[1][1], doeswin[1][2], doeswin[1][3])
         print_board()
-        print(f'{playername} won!')
+        print(f'{playername} connected 4!')
+        remove_asterisks()
+        print_board()
+
         return True
     return False
 
