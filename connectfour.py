@@ -1,5 +1,10 @@
-from typing import Counter
+"""
+Connect-4: A Game in Python
 
+Alex Papadopoulos
+Dimitris Fotogiannopoulos
+Dimitris Toumazatos
+"""
 
 def make_board(): # Creates an empty nXn game board
     board = [[] for x in range(n)]
@@ -23,6 +28,14 @@ def print_board():
         print(''.join(board[i])) # Game board rows as joined strings
     print(board[-1] + '\n') # --- line
 
+def copy_board():
+    temp = []
+    for i in range(n):
+        temp.append([])
+        for j in range(n):
+            temp[i].append(positions[i][j])
+    return temp
+
 def give_dimensions():
     n = input("Give the game board dimensions (5-10): ").strip()
 
@@ -30,6 +43,9 @@ def give_dimensions():
         n = input("Please give a valid input (5-10): ").strip()
     
     return int(n)
+
+def make_player(name, player):
+    return {'name': name, 'number': player, 'score': 0}
 
 def player_move(player):
     def place_in_col(col): # Drops disk in column
@@ -46,65 +62,70 @@ def player_move(player):
         board[i+2][j+1] = f'   {positions[i][j]}|'
     
     def wincond(p): # Checks if player wins after latest move (p is tuple of (i, j))
-        def horizontal(score): # Checks for 4 disks in row
+        def horizontal(player): # Checks for 4 disks in row
             count = 0
             win = False
             index = -1
             row = p[0] # Only checks the row where latest disk was placed
+            temp = copy_board()
 
             for j in range(n):
-                if count == 0 and positions[row][j]==disk: # Disk is first in sequence
+                if count == 0 and temp[row][j]==disk: # Disk is first in sequence
                     index = j # Position of first disk
                     count += 1
-                elif count > 0 and count < 3 and positions[row][j] == disk: # Disk is in sequence
+                elif count > 0 and count < 3 and temp[row][j] == disk: # Disk is in sequence
                     count += 1
-                elif count < 4 and positions[row][j] != disk: # Disk breaks previous sequence
+                elif count < 4 and temp[row][j] != disk: # Disk breaks previous sequence
                     count = 0
-                elif count == 3 and positions[row][j] == disk: # Disk creates winning sequence
+                elif count == 3 and temp[row][j] == disk: # Disk creates winning sequence
                     win = True
                     count += 1
-                elif count >= 4 and positions[row][j] == disk: # Disk increases score of winning sequence
+                elif count >= 4 and temp[row][j] == disk: # Disk increases score of winning sequence
                     count += 1
                 else: # Disk breaks the winning sequence
                     break
 
             if win:
-                score += count # Increases the score of the player if they won
+                player['score'] += count # Increases the score of the player if they won
                 for i in range(index, index+count): # Makes the winning disks stars(*)
-                    positions[row][i] = '*'
-                    change_board(row, i)
-            return win
+                    temp[row][i] = '*'
+            
+            
+            return (win, temp)
         
-        def vertical(score): # Checks for 4 disks in column
+        def vertical(player): # Checks for 4 disks in column
             count = 0
             win = False
             col = p[1]
+            temp = copy_board()
 
             for i in range(n-1, -1, -1): # Searches column bottom-up for winning sequence
-                if positions[i][col] == ' ':
+                if temp[i][col] == ' ':
                     break
-                elif count == 0 and positions[i][col]==disk: # Disk is first in sequence
+                elif count == 0 and temp[i][col]==disk: # Disk is first in sequence
                     count += 1
-                elif count > 0 and count < 3 and positions[i][col] == disk: # Disk is in sequence
+                elif count > 0 and count < 3 and temp[i][col] == disk: # Disk is in sequence
                     count += 1
-                elif count < 4 and positions[i][col] != disk: # Disk breaks previous sequence
+                elif count < 4 and temp[i][col] != disk: # Disk breaks previous sequence
                     count = 0
-                elif count == 3 and positions[i][col] == disk: # Disk creates winning sequence
+                elif count == 3 and temp[i][col] == disk: # Disk creates winning sequence
                     win = True
                     break
 
             if win:
-                score += 4 # Maximum 4 consecutive disks in a column
+                player['score'] += 4 # Maximum 4 consecutive disks in a column
 
                 for i in range(p[0], p[0]+4): # Turns vertical sequence to stars (*)
-                    positions[i][col] = '*'
-                    change_board(i, col)
-            return win
+                    temp[i][col] = '*'
+                
+            return (win, temp)
         
-        def diagonal1(score): # Checks for 4 disks in y=x diagonal
+        def diagonal1(player): # Checks for 4 disks in y=x diagonal
             count = 0
             win = False
             i, j = p[0], p[1]
+            temp = copy_board()
+
             while i != n-1 and j != 0: # Finds leftmost cell of y=x diagonal
                 i += 1
                 j -= 1
@@ -115,36 +136,37 @@ def player_move(player):
                 dlength = i+1-j
 
             for k in range(dlength):
-                if count == 0 and positions[i-k][j+k]==disk: # Disk is first in sequence
+                if count == 0 and temp[i-k][j+k]==disk: # Disk is first in sequence
                     pos = (i-k, j+k) # Coordinates of first disk
                     count += 1
-                elif count > 0 and count < 3 and positions[i-k][j+k] == disk: # Disk is in sequence
+                elif count > 0 and count < 3 and temp[i-k][j+k] == disk: # Disk is in sequence
                     count += 1
-                elif count < 4 and positions[i-k][j+k] != disk: # Disk breaks previous sequence
+                elif count < 4 and temp[i-k][j+k] != disk: # Disk breaks previous sequence
                     count = 0
-                elif count == 3 and positions[i-k][j+k] == disk: # Disk creates winning sequence
+                elif count == 3 and temp[i-k][j+k] == disk: # Disk creates winning sequence
                     win = True
                     count += 1
-                elif count >= 4 and positions[i-k][j+k] == disk: # Disk increases score of winning sequence
+                elif count >= 4 and temp[i-k][j+k] == disk: # Disk increases score of winning sequence
                     count += 1
                 else: # Disk breaks the winning sequence
                     break
 
 
             if win:
-                score += count
+                player['score'] += count
 
                 i = pos[0]
                 j = pos[1]
                 for k in range(count):
-                    positions[i-k][j+k] = '*'
-                    change_board(i-k, j+k)
-            return win
+                    temp[i-k][j+k] = '*'
+            return (win, temp)
         
-        def diagonal2(score): # Checks for 4 disks in y=-x diagonal
+        def diagonal2(player): # Checks for 4 disks in y=-x diagonal
             count = 0
             win = False
             i, j = p[0], p[1]
+            temp = copy_board()
+
             while i != n-1 and j != n-1: # Finds rightmost cell of y=-x diagonal
                 i += 1
                 j += 1
@@ -155,58 +177,81 @@ def player_move(player):
                 dlength = j+1
 
             for k in range(dlength):
-                if count == 0 and positions[i-k][j-k]==disk: # Disk is first in sequence
+                if count == 0 and temp[i-k][j-k]==disk: # Disk is first in sequence
                     pos = (i-k, j-k) # Coordinates of first disk
                     count += 1
-                elif count > 0 and count < 3 and positions[i-k][j-k] == disk: # Disk is in sequence
+                elif count > 0 and count < 3 and temp[i-k][j-k] == disk: # Disk is in sequence
                     count += 1
-                elif count < 4 and positions[i-k][j-k] != disk: # Disk breaks previous sequence
+                elif count < 4 and temp[i-k][j-k] != disk: # Disk breaks previous sequence
                     count = 0
-                elif count == 3 and positions[i-k][j-k] == disk: # Disk creates winning sequence
+                elif count == 3 and temp[i-k][j-k] == disk: # Disk creates winning sequence
                     win = True
                     count += 1
-                elif count >= 4 and positions[i-k][j-k] == disk: # Disk increases score of winning sequence
+                elif count >= 4 and temp[i-k][j-k] == disk: # Disk increases score of winning sequence
                     count += 1
                 else: # Disk breaks the winning sequence
                     break
 
 
             if win:
-                score += count
+                player['score'] += count
 
                 i = pos[0]
                 j = pos[1]
                 for k in range(count):
-                    positions[i-k][j-k] = '*'
-                    change_board(i-k, j-k)
-            return win
+                    temp[i-k][j-k] = '*'
+            return (win, temp)
+            
+        h = horizontal(player) # Returns tuple, first element Boolean, second element the board with *
+        v = vertical(player) # For columns
+        d1 = diagonal1(player) # For diagonal y=x
+        d2 = diagonal2(player) # For diagonal y=-x
 
-        score = 0
-        h = horizontal(score)
-        v = vertical(score)
-        d1 = diagonal1(score)
-        d2 = diagonal2(score)
+        if h[0] or v[0] or d1[0] or d2[0]: # If at least one win in any direction returns tuple (Boolean, list of boards with *)
+            return (True, [h[1], v[1], d1[1], d2[1]]) # Temporal boards are used to support multi-directional wins
+        return (False, None)
 
-        if h or v or d1 or d2:
-            return True
-
-    if player == 1:
+    if player['number'] == 1:
         disk = 'O'
     else:
         disk = 'X'
+
+    playername = player['name']
     
-    col = input(f'Player {player}: Choose a column for your disk: ').strip()
+    col = input(f'{playername}: Choose a column for your disk: ').strip()
 
     while not col.isdigit() or int(col)<1 or int(col)>n or positions[0][int(col)-1]!=' ': # Checks that input is 1-N integer and column is empty
-        col = input(f'Player {player}: Choose a valid column for your disk: ').strip()
+        col = input(f'{playername}: Choose a valid column for your disk: ').strip()
     
     cords = place_in_col(int(col))
 
+    print('\n')
     print_board()
+    print('\n\n')
 
-    if wincond(cords):
-        print(f'Player {player} won!')
+    doeswin = wincond(cords) # Tuple of Boolean and a list of temporal boards that replaced winning disks with *
+    if doeswin[0]:
+        hor = doeswin[1][0]
+        ver = doeswin[1][1]
+        diag1 = doeswin[1][2]
+        diag2 = doeswin[1][3]
+        for i in range(n): # Changes main board's winning disks with asterisks (*)
+            for j in range(n):
+                if hor[i][j] == '*':
+                    positions[i][j] = '*'
+                    change_board(i, j)
+                elif ver[i][j] == '*':
+                    positions[i][j] = '*'
+                    change_board(i, j)
+                elif diag1[i][j] == '*':
+                    positions[i][j] = '*'
+                    change_board(i, j)
+                elif diag2[i][j] == '*':
+                    positions[i][j] = '*'
+                    change_board(i, j)
+        
         print_board()
+        print(f'{playername} won!')
         return True
     return False
 
@@ -217,11 +262,14 @@ positions = [] # nXn list for player moves
 for i in range(n): # initialized as empty
     positions.append([' ']*n)
 
+player1 = make_player(input('Player 1, what\'s your name?\n'), 1)
+player2 = make_player(input('Player 2, what\'s your name?\n'), 2)
+
 board = make_board()
-player = 1
+player = player1
 print_board()
 while not player_move(player): # Game runs until someone wins
-    if player == 1:
-        player = 2
+    if player['number'] == 1:
+        player = player2
     else:
-        player = 1
+        player = player1
