@@ -6,8 +6,7 @@ Dimitris Fotogiannopoulos
 Dimitris Toumazatos
 """
 
-from turtle import pos
-
+from time import sleep
 
 def make_board(): # Creates an empty nXn game board
     board = [[] for x in range(n)]
@@ -81,18 +80,23 @@ def player_move(player):
                         change_board(i, j)
     
     def remove_asterisks(): # Removes asterisks and slides down other disks
-        for j in range(n):
-            for i in range(n-1, 0, -1): # Covers for horizontal and diagonal sequences
-                if positions[i][j] == '*':
-                    positions[i][j] = positions[i-1][j]
-                    positions[i-1][j] = '*'
-                    change_board(i,j)
+        def drop(j):
+            col = []
+            for i in range(n-1,-1,-1):
+                col.append(positions[i][j])
             
-        for i in range(n): # Covers for vertical sequences (can't have disks on top of them)
-            for j in range(n):
-                if positions[i][j] == '*':
-                    positions[i][j] = ' '
-                    change_board(i,j)
+            for i in range(n):
+                while col[i] == '*':
+                    col.pop(i)
+                    col.append(' ')
+            
+            for i in range(n-1,-1,-1):
+                positions[i][j] = col[n-i-1]
+                change_board(i,j)
+
+
+        for j in range(n):
+            drop(j)
         
         
 
@@ -270,6 +274,7 @@ def player_move(player):
         asterisks(doeswin[1][0], doeswin[1][1], doeswin[1][2], doeswin[1][3])
         print_board()
         print(f'{playername} connected 4!')
+        sleep(1)
         remove_asterisks()
         print_board()
 
@@ -287,10 +292,19 @@ player1 = make_player(input('Player 1, what\'s your name?\n'), 1)
 player2 = make_player(input('Player 2, what\'s your name?\n'), 2)
 
 board = make_board()
-player = player1
+player = player2
 print_board()
-while not player_move(player): # Game runs until someone wins
+while any(' ' in ls for ls in positions): # Game runs until someone wins
     if player['number'] == 1:
         player = player2
     else:
         player = player1
+    
+    player_move(player)
+
+if player1['score'] > player2['score']:
+    print(f"Player 1 {player1['name']} won the game with a score of {player1['score']} against {player2['name']}'\s {player2['score']}")
+elif player1['score']==player2['score']:
+    print('How did you guys manage to tie in a game of connect-4?')
+else:
+    print(f"Player 2 {player2['name']} won the game with a score of {player2['score']} against {player1['name']}'\s {player1['score']}")
