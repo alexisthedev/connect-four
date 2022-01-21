@@ -10,6 +10,13 @@ import csv
 from time import sleep
 
 def start():
+    """
+    Initializes new game objects if the users
+    choose to start a new game
+
+    """
+
+
     global positions
     global player1
     global player2
@@ -23,7 +30,11 @@ def start():
     player1 = make_player(input('Player 1, what\'s your name?\n'), 1)
     player2 = make_player(input('Player 2, what\'s your name?\n'), 2)
 
-def make_board(): # Creates an empty nXn game board
+def make_board():
+    """
+    Creates an empty nXn game board (visualization)
+    """
+
     board = [[] for x in range(n)]
 
     for i in range(n):
@@ -39,6 +50,11 @@ def make_board(): # Creates an empty nXn game board
     return board
 
 def print_board():
+    """
+    Prints the game board (visualzied) at the state of the game
+    depending on the values of the positions two-dimensional array ('O', 'X', ' ')
+    """
+
     print(''.join(board[0])) # Column numbers as joined string
     print(board[1]) # --- line
     for i in range(2, n+2):
@@ -46,6 +62,11 @@ def print_board():
     print(board[-1] + '\n') # --- line
 
 def copy_board():
+    """
+    Creates a copy of the positions array (non-visualized board)
+
+    """
+
     temp = []
     for i in range(n):
         temp.append([])
@@ -54,6 +75,11 @@ def copy_board():
     return temp
 
 def give_dimensions():
+    """
+    Gets the board dimensions from the players
+
+    """
+
     n = input("Give the game board dimensions (5-10): ").strip()
 
     while not n.isdigit() or int(n)<5 or int(n)>10: # Checks if input is a 5-10 integer
@@ -62,9 +88,26 @@ def give_dimensions():
     return int(n)
 
 def make_player(name, player, score=0):
+    """
+    Creates player dictionary that holds values of player name, 
+    whether the player is player 1 or 2, and individual score
+
+    >>> make_player('alex', 1)
+    {'name': 'alex', 'number': 1, 'score': 0}
+    
+    >>> make_player('dimitris', 2, 50)
+    {'name': 'dimitris', 'number': 2, 'score': 50}
+
+    """
+
     return {'name': name, 'number': player, 'score': score}
 
-def save_game(board, pone, ptwo): # Saves game state
+def save_game(board, pone, ptwo):
+    """
+    Saves current game state (boar, scores, player names)
+    in a file named by the players
+    """
+
     for i in range(n):
         for j in range(n):
             cell = board[i][j]
@@ -85,6 +128,11 @@ def save_game(board, pone, ptwo): # Saves game state
         writer.writerows(board)
 
 def load_game():
+    """
+    Loads previously saved game from a file
+    
+    """
+
     global positions
     global player1
     global player2
@@ -116,7 +164,24 @@ def load_game():
     
 
 def player_move(player):
-    def place_in_col(col): # Drops disk in column
+    """
+    General function that orchestrates each player move
+    (disk placement, win check, board visualization update, asterisks, etc)
+
+    """
+
+    def place_in_col(col):
+        """
+        Drops player's disk (O or X) in chosen column (if not full)
+
+        >>> n = 5
+        >>> disk = 'O'
+        >>> positions = [[' '*n], [' '*n], [' '*n], [' '*n], [' '*n]]
+        >>> place_in_col(3)
+        >>> positions[4][2] == 'O'
+        True
+        """
+
         row = n-1
         while positions[row][col-1] != ' ': # Starts checking if column cell is empty from bottom to top
             row -= 1 # Goes on cell up until the first empty cell is found
@@ -126,27 +191,43 @@ def player_move(player):
 
         return (row, col-1) # col-1 because in the visualization the letter cell A| is at index 0
 
-    def change_board(i, j): # Updates the state of the game board
+    def change_board(i, j):
+        """
+        Updates the state of the visualized game board
+        (called when changes are made to the positions array)
+
+        """
+
         board[i+2][j+1] = f'   {positions[i][j]}|'
 
-    def asterisks(hor, ver, diag1, diag2): # Changes winning disks to asterisks (*)
-            for i in range(n):
-                for j in range(n):
-                    if hor[i][j] == '*':
-                        positions[i][j] = '*'
-                        change_board(i, j)
-                    elif ver[i][j] == '*':
-                        positions[i][j] = '*'
-                        change_board(i, j)
-                    elif diag1[i][j] == '*':
-                        positions[i][j] = '*'
-                        change_board(i, j)
-                    elif diag2[i][j] == '*':
-                        positions[i][j] = '*'
-                        change_board(i, j)
+    def asterisks(hor, ver, diag1, diag2):
+        """
+        Replaces winning disk sequences  with asterisks (*)
+        
+        """
+
+        for i in range(n):
+            for j in range(n):
+                if hor[i][j] == '*':
+                    positions[i][j] = '*'
+                    change_board(i, j)
+                elif ver[i][j] == '*':
+                    positions[i][j] = '*'
+                    change_board(i, j)
+                elif diag1[i][j] == '*':
+                    positions[i][j] = '*'
+                    change_board(i, j)
+                elif diag2[i][j] == '*':
+                    positions[i][j] = '*'
+                    change_board(i, j)
     
-    def remove_asterisks(): # Removes asterisks and slides down other disks
-        def drop(j):
+    def remove_asterisks():
+        """
+        Removes asterisks and slides floating disks down
+        
+        """
+
+        for j in range(n):
             col = []
             for i in range(n-1,-1,-1):
                 col.append(positions[i][j])
@@ -159,16 +240,20 @@ def player_move(player):
             for i in range(n-1,-1,-1):
                 positions[i][j] = col[n-i-1]
                 change_board(i,j)
-
-
-        for j in range(n):
-            drop(j)
-        
-        
-
     
-    def wincond(p): # Checks if player wins after latest move (p is tuple of (i, j))
-        def horizontal(player): # Checks for 4 disks in row
+    def wincond(p):
+        """
+        Checks if player wins after latest move
+        (p is tutple of (i,j) indexes/coordinates)
+
+        """
+
+        def horizontal(player):
+            """
+            Checks for 4 disks in horizontal row
+
+            """
+
             count = 0
             win = False
             index = -1
@@ -199,7 +284,12 @@ def player_move(player):
             
             return (win, temp)
         
-        def vertical(player): # Checks for 4 disks in column
+        def vertical(player):
+            """
+            Checks for 4 disks in vertical column
+            
+            """
+
             count = 0
             win = False
             col = p[1]
@@ -226,7 +316,11 @@ def player_move(player):
                 
             return (win, temp)
         
-        def diagonal1(player): # Checks for 4 disks in y=x diagonal
+        def diagonal1(player):
+            """
+            Checks for 4 disks in y=x diagonal
+            
+            """
             count = 0
             win = False
             i, j = p[0], p[1]
@@ -267,7 +361,12 @@ def player_move(player):
                     temp[i-k][j+k] = '*'
             return (win, temp)
         
-        def diagonal2(player): # Checks for 4 disks in y=-x diagonal
+        def diagonal2(player):
+            """
+            Checks for 4 disks in y=-x diagonal
+
+            """
+            
             count = 0
             win = False
             i, j = p[0], p[1]
@@ -344,39 +443,40 @@ def player_move(player):
         remove_asterisks()
         print_board()
 
-print('Welcome to Connect-4!')
+if __name__ == '__main__':
+    print('Welcome to Connect-4!')
 
-gamestate = input('Would you like to start a new game (N) or load one from a file (S)? ').strip() # Checks for valid input on New or Load game
-while gamestate != 'S' and gamestate != 'N':
-    gamestate = input('Please enter a valid input (N for new game, S to load game): ').strip()
+    gamestate = input('Would you like to start a new game (N) or load one from a file (S)? ').strip() # Checks for valid input on New or Load game
+    while gamestate != 'S' and gamestate != 'N':
+        gamestate = input('Please enter a valid input (N for new game, S to load game): ').strip()
 
 
-if gamestate == 'N':
-    start()
-else:
-    load_game()
-
-board = make_board()
-print_board()
-
-while True: # Game runs until board fills up or game state is saved
-    player_move(player1)
-    if not any(' ' in ls for ls in positions): # Stops if board filled up after player 1 moved
-        break
-    
-    player_move(player2)
-    if not any(' ' in ls for ls in positions): # Stops if board filled up after player 2 move
-        break
-
-    ans = input("\n\nChoose any key to continue playing.\nTo pause and save the game choose 's': ")
-    if ans == 's':
-        save_game(positions, player1, player2)
-        break
-
-if any(' ' in ls for ls in positions): # Prints out score when game is finished (full board)
-    if player1['score'] > player2['score']:
-        print(f"Player 1 {player1['name']} won the game with a score of {player1['score']} against {player2['name']}'\s {player2['score']}")
-    elif player1['score']==player2['score']:
-        print('How did you guys manage to tie in a game of connect-4?')
+    if gamestate == 'N':
+        start()
     else:
-        print(f"Player 2 {player2['name']} won the game with a score of {player2['score']} against {player1['name']}'\s {player1['score']}")
+        load_game()
+
+    board = make_board()
+    print_board()
+
+    while True: # Game runs until board fills up or game state is saved
+        player_move(player1)
+        if not any(' ' in ls for ls in positions): # Stops if board filled up after player 1 moved
+            break
+        
+        player_move(player2)
+        if not any(' ' in ls for ls in positions): # Stops if board filled up after player 2 move
+            break
+
+        ans = input("\n\nChoose any key to continue playing.\nTo pause and save the game choose 's': ")
+        if ans == 's':
+            save_game(positions, player1, player2)
+            break
+
+    if any(' ' in ls for ls in positions): # Prints out score when game is finished (full board)
+        if player1['score'] > player2['score']:
+            print(f"Player 1 {player1['name']} won the game with a score of {player1['score']} against {player2['name']}'\s {player2['score']}")
+        elif player1['score']==player2['score']:
+            print('How did you guys manage to tie in a game of connect-4?')
+        else:
+            print(f"Player 2 {player2['name']} won the game with a score of {player2['score']} against {player1['name']}'\s {player1['score']}")
