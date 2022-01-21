@@ -278,10 +278,6 @@ def player_move(player):
         remove_asterisks()
         print_board()
 
-        return True
-    return False
-
-
 print('Welcome to Connect-4!')
 n = give_dimensions()
 positions = [] # nXn list for player moves
