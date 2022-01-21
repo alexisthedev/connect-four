@@ -1,9 +1,12 @@
 """
 Connect-4: A Game in Python
 
-Alex Papadopoulos
-Dimitris Fotogiannopoulos
-Dimitris Toumazatos
+Alex Papadopoulos [github.com/alexisthedev]
+
+Dimitris Fotogiannopoulos [github.com/dfotogiannopoulos]
+
+Dimitris Toumazatos [github.com/dimitristoumazatos]
+
 """
 
 import csv
@@ -366,7 +369,7 @@ def player_move(player):
             Checks for 4 disks in y=-x diagonal
 
             """
-            
+
             count = 0
             win = False
             i, j = p[0], p[1]
