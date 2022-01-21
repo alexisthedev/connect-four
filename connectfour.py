@@ -6,7 +6,22 @@ Dimitris Fotogiannopoulos
 Dimitris Toumazatos
 """
 
+import csv
 from time import sleep
+
+def start():
+    global positions
+    global player1
+    global player2
+    global n
+
+    n = give_dimensions()
+    positions = [] # nXn list for player moves
+    for i in range(n): # initialized as empty
+        positions.append([' ']*n)
+
+    player1 = make_player(input('Player 1, what\'s your name?\n'), 1)
+    player2 = make_player(input('Player 2, what\'s your name?\n'), 2)
 
 def make_board(): # Creates an empty nXn game board
     board = [[] for x in range(n)]
@@ -46,8 +61,59 @@ def give_dimensions():
     
     return int(n)
 
-def make_player(name, player):
-    return {'name': name, 'number': player, 'score': 0}
+def make_player(name, player, score=0):
+    return {'name': name, 'number': player, 'score': score}
+
+def save_game(board, pone, ptwo): # Saves game state
+    for i in range(n):
+        for j in range(n):
+            cell = board[i][j]
+            if cell == ' ':
+                board[i][j] = 0
+            elif cell == 'O':
+                board[i][j] = 1
+            else:
+                board[i][j] = 2
+    
+    board.append([pone['score'], ptwo['score']])
+    board.append([pone['name'],ptwo['name']])
+
+    filename = input('Give file name: ').strip()
+
+    with open(f'{filename}', 'w', newline='') as file:
+        writer = csv.writer(file)
+        writer.writerows(board)
+
+def load_game():
+    global positions
+    global player1
+    global player2
+    global n
+
+    positions = []
+    filename = input('Give file name: ').strip()
+    with open(f'{filename}', 'r') as file:
+        reader = csv.reader(file)
+        for row in reader:
+            positions.append(row)
+    
+    names = positions.pop(-1)
+    scores = positions.pop(-1)
+
+    player1 = make_player(names[0], 1, int(scores[0]))
+    player2 = make_player(names[1], 2, int(scores[1]))
+
+    n = len(positions)
+    for i in range(n):
+        for j in range(n):
+            cell = int(positions[i][j])
+            if cell == 0:
+                positions[i][j] = ' '
+            elif cell == 1:
+                positions[i][j] = 'O'
+            else:
+                positions[i][j] = 'X'
+    
 
 def player_move(player):
     def place_in_col(col): # Drops disk in column
@@ -279,28 +345,38 @@ def player_move(player):
         print_board()
 
 print('Welcome to Connect-4!')
-n = give_dimensions()
-positions = [] # nXn list for player moves
-for i in range(n): # initialized as empty
-    positions.append([' ']*n)
 
-player1 = make_player(input('Player 1, what\'s your name?\n'), 1)
-player2 = make_player(input('Player 2, what\'s your name?\n'), 2)
+gamestate = input('Would you like to start a new game (N) or load one from a file (S)? ').strip() # Checks for valid input on New or Load game
+while gamestate != 'S' and gamestate != 'N':
+    gamestate = input('Please enter a valid input (N for new game, S to load game): ').strip()
+
+
+if gamestate == 'N':
+    start()
+else:
+    load_game()
 
 board = make_board()
-player = player2
 print_board()
-while any(' ' in ls for ls in positions): # Game runs until someone wins
-    if player['number'] == 1:
-        player = player2
-    else:
-        player = player1
-    
-    player_move(player)
 
-if player1['score'] > player2['score']:
-    print(f"Player 1 {player1['name']} won the game with a score of {player1['score']} against {player2['name']}'\s {player2['score']}")
-elif player1['score']==player2['score']:
-    print('How did you guys manage to tie in a game of connect-4?')
-else:
-    print(f"Player 2 {player2['name']} won the game with a score of {player2['score']} against {player1['name']}'\s {player1['score']}")
+while True: # Game runs until board fills up or game state is saved
+    player_move(player1)
+    if not any(' ' in ls for ls in positions): # Stops if board filled up after player 1 moved
+        break
+    
+    player_move(player2)
+    if not any(' ' in ls for ls in positions): # Stops if board filled up after player 2 move
+        break
+
+    ans = input("\n\nChoose any key to continue playing.\nTo pause and save the game choose 's': ")
+    if ans == 's':
+        save_game(positions, player1, player2)
+        break
+
+if any(' ' in ls for ls in positions): # Prints out score when game is finished (full board)
+    if player1['score'] > player2['score']:
+        print(f"Player 1 {player1['name']} won the game with a score of {player1['score']} against {player2['name']}'\s {player2['score']}")
+    elif player1['score']==player2['score']:
+        print('How did you guys manage to tie in a game of connect-4?')
+    else:
+        print(f"Player 2 {player2['name']} won the game with a score of {player2['score']} against {player1['name']}'\s {player1['score']}")
