@@ -1,6 +1,8 @@
 # Connect-4: The popular board game in Python
 Created by: Alex Papadopoulos, Dimitris Toumazatos, Dimitris Fotogiannopoulos
 
+![example](https://user-images.githubusercontent.com/20843172/150542340-ffa6371c-9220-4058-9fa9-b4a3268e6377.png)
+
 ## Info about the project:
 
 This project recreates the popular board game Connect-4 in a command-line interface. It supports multiple consecutive rounds, as winning sequences get turned into asterisks (*) and then disappear!
