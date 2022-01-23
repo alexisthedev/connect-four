@@ -107,7 +107,7 @@ def make_player(name, player, score=0):
 
 def save_game(board, pone, ptwo):
     """
-    Saves current game state (boar, scores, player names)
+    Saves current game state (board, scores, player names)
     in a file named by the players
     """
 
