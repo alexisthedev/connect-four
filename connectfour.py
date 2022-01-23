@@ -471,12 +471,14 @@ if __name__ == '__main__':
         if not any(' ' in ls for ls in positions): # Stops if board filled up after player 2 move
             break
 
+        print(f"Player 1 {player1['name']} score: {player1['score']}\nPlayer 2 {player2['name']} score: {player2['score']}")
+
         ans = input("\n\nChoose any key to continue playing.\nTo pause and save the game choose 's': ")
         if ans == 's':
             save_game(positions, player1, player2)
             break
 
-    if any(' ' in ls for ls in positions): # Prints out score when game is finished (full board)
+    if not any(' ' in ls for ls in positions): # Prints out score when game is finished (full board)
         if player1['score'] > player2['score']:
             print(f"Player 1 {player1['name']} won the game with a score of {player1['score']} against {player2['name']}'\s {player2['score']}")
         elif player1['score']==player2['score']:
