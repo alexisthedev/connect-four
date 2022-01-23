@@ -480,8 +480,8 @@ if __name__ == '__main__':
 
     if not any(' ' in ls for ls in positions): # Prints out score when game is finished (full board)
         if player1['score'] > player2['score']:
-            print(f"Player 1 {player1['name']} won the game with a score of {player1['score']} against {player2['name']}'\s {player2['score']}")
+            print(f"Player 1 {player1['name']} won the game with a score of {player1['score']} against {player2['name']}'s {player2['score']}")
         elif player1['score']==player2['score']:
             print('How did you guys manage to tie in a game of connect-4?')
         else:
-            print(f"Player 2 {player2['name']} won the game with a score of {player2['score']} against {player1['name']}'\s {player1['score']}")
+            print(f"Player 2 {player2['name']} won the game with a score of {player2['score']} against {player1['name']}'s {player1['score']}")
